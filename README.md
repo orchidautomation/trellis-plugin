@@ -48,6 +48,14 @@ The goal is simple:
 
 > a noob who vibecoded this into existence can use the Trellis plugin to create and ship a GTM agent to production
 
+That agent might be:
+
+- an AI SDR
+- a meeting-prep agent
+- an account-research agent
+- a customer-success copilot
+- a GTM analytics or recommendation workflow
+
 ## Source Layout
 
 - `pluxx.config.ts`
