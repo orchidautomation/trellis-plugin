@@ -1,0 +1,41 @@
+name: Build Plugin
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PLUXX_REPO_DIR: ${{ github.workspace }}/pluxx-cli
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout plugin repo
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.17
+
+      - name: Clone Pluxx CLI repo
+        run: git clone --depth 1 https://github.com/orchidautomation/pluxx.git "$PLUXX_REPO_DIR"
+
+      - name: Build and validate plugin
+        run: ./scripts/build-with-pluxx-checkout.sh
+
+      - name: Validate GitHub release publish plan
+        run: node "$PLUXX_REPO_DIR/bin/pluxx.js" publish --github-release --allow-dirty --dry-run --version 0.1.0
+
+      - name: Upload raw dist artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trellis-plugin-dist-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error

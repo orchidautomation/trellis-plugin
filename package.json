@@ -1,0 +1,22 @@
+{
+  "name": "trellis-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "doctor": "pluxx doctor",
+    "lint": "pluxx lint",
+    "validate": "pluxx validate",
+    "build": "pluxx build --target claude-code cursor codex opencode",
+    "publish:dry-run": "pluxx publish --github-release --dry-run --allow-dirty --version 0.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/orchidautomation/trellis-plugin.git"
+  },
+  "homepage": "https://github.com/orchidautomation/trellis-plugin",
+  "bugs": {
+    "url": "https://github.com/orchidautomation/trellis-plugin/issues"
+  }
+}
