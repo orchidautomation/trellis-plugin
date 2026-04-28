@@ -7,6 +7,8 @@ description: "Connect Claude Code, Codex, Cursor, or OpenCode to a local or depl
 
 Use this skill when the user wants their coding host connected to Trellis over MCP.
 
+Remote MCP comes after app health, not before.
+
 ## Commands
 
 For local app control:
@@ -38,6 +40,17 @@ The deployed control surface is the Trellis MCP endpoint, usually:
 ```text
 ${APP_URL}/mcp/trellis
 ```
+
+## Order
+
+For a hosted app, only connect remote MCP after:
+
+1. deploy succeeds
+2. `GET ${APP_URL}/healthz` is healthy
+3. `${APP_URL}/dashboard` loads
+4. the user is ready to run the safe demo through the host
+
+If those checks are not green, route the user back to readiness or deploy instead of debugging through MCP first.
 
 ## Tell The User
 

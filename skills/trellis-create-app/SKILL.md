@@ -5,7 +5,21 @@ description: "Scaffold a new Trellis app with the right optional GTM lanes and t
 
 # Trellis Create App
 
-Use this skill when the user wants to create a new Trellis app.
+Use this skill when the user explicitly wants to scaffold a new Trellis app instead of using the reference AI SDR first.
+
+## Demo Rule
+
+If the user just wants to see Trellis work, do not start here.
+
+Route them to the reference AI SDR demo path first:
+
+1. use the existing reference app
+2. fill `.env`
+3. run `doctor` and get smoke mode green
+4. deploy
+5. verify health and dashboard
+6. connect remote MCP
+7. run one safe signal
 
 ## Default Path
 
@@ -15,7 +29,7 @@ Start with the smallest viable Trellis app:
 npm run ai-sdr -- init ../my-trellis-agent --name my-trellis-agent --json
 ```
 
-If the user explicitly wants the AI SDR recipe, add the lanes they need:
+If the user explicitly wants the AI SDR recipe scaffold, add the lanes they need:
 
 ```bash
 npm run ai-sdr -- init ../my-ai-sdr --name my-ai-sdr \
@@ -46,5 +60,11 @@ cd <new-app>
 npm install
 cp .env.example .env
 ```
+
+Then tell them:
+
+1. fill `.env` with only the core demo values first
+2. run `npm run doctor -- --json`
+3. move to `trellis-readiness-check`
 
 Then move them to `trellis-readiness-check`.

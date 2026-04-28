@@ -5,13 +5,13 @@ description: "Route a new Trellis user to the next correct workflow without maki
 
 # Trellis Onboarding
 
-Use this skill when a user is new to Trellis and wants the shortest path from scaffold to a working GTM agent.
+Use this skill when a user is new to Trellis and wants the shortest path to a working Trellis demo or app.
 
 ## Framing
 
 Trellis is the framework.
 
-An AI SDR is one example recipe built with Trellis.
+The reference AI SDR is the first demo path.
 
 Keep the explanation simple:
 
@@ -33,16 +33,40 @@ Do one thing at a time:
 
 Prefer:
 
+- `Next: use the reference AI SDR before scaffolding a custom app`
+- `Next: get smoke mode green locally`
 - `Next: run vercel login`
 - `Blocked: CONVEX_URL is missing`
-- `Next: connect Apify for discovery`
+- `Next: connect Firecrawl before optional lanes`
+
+## Default Demo Order
+
+Unless the user explicitly wants a custom scaffold, route them through this order:
+
+1. create app or use the reference AI SDR already in the Trellis repo
+2. fill `.env`
+3. run `doctor` and get smoke mode green locally
+4. deploy
+5. verify `/healthz` and `/dashboard`
+6. connect remote MCP
+7. run one safe signal demo
+8. only then enable discovery or real sends
+
+Say the next step in those exact verbs when possible:
+
+- `Next: create app`
+- `Next: fill .env`
+- `Next: run doctor`
+- `Next: deploy`
+- `Next: connect remote MCP`
+- `Next: run one safe demo`
 
 ## Route To The Right Skill
 
 Use these skills based on the user's next need:
 
 - `trellis-create-app`
-  - when they need a new Trellis app scaffold
+  - when they explicitly need a new Trellis app scaffold
 - `trellis-readiness-check`
   - when they need to know what is missing before boot or deploy
 - `trellis-stack-explainer`
@@ -52,7 +76,7 @@ Use these skills based on the user's next need:
 - `trellis-connect-mcp`
   - when they need local or remote MCP connected to Claude Code, Codex, Cursor, or OpenCode
 - `trellis-first-deploy`
-  - when they want the shortest path to production
+  - when they want the shortest path from local proof to a hosted demo
 
 ## Source Of Truth
 

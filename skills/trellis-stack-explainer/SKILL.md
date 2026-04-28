@@ -7,6 +7,8 @@ description: "Explain a Trellis app's active stack, knowledge, skills, and provi
 
 Use this skill when a user wants to understand what their Trellis app actually contains.
 
+For demo questions, anchor on the reference AI SDR first unless the user is already inside a custom app.
+
 ## Required Inputs
 
 Read:
@@ -25,6 +27,7 @@ Explain the app in this order:
 4. what providers are active
 5. what each provider does
 6. what is optional vs required
+7. what the first safe demo path is
 
 ## Plain Language
 
@@ -37,3 +40,14 @@ Use this mapping:
 - bindings = which outside service does which job
 
 Do not answer with raw schema language first.
+
+For the reference AI SDR, the first safe demo path is:
+
+1. create app or use the reference app
+2. fill `.env`
+3. run `doctor` and get local smoke mode green
+4. hosted deploy
+5. health and dashboard
+6. remote MCP
+7. one signal
+8. only then optional lanes like discovery or sends

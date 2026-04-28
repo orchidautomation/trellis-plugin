@@ -7,6 +7,13 @@ description: "Diagnose what is missing before a Trellis app can boot, connect pr
 
 Use this skill when the user wants to know what is missing before Trellis can run.
 
+The noob sequence here is:
+
+1. fill `.env`
+2. run `npm run doctor -- --json`
+3. fix only the next blocker
+4. boot local smoke mode
+
 ## Required Commands
 
 Run:
@@ -21,7 +28,8 @@ npm run doctor -- --json
 Group blockers into:
 
 - boot blockers
-- discovery blockers
+- core demo blockers
+- optional lane blockers
 - optional blockers
 
 Do not dump the full environment matrix unless the user asks for it.
@@ -35,11 +43,13 @@ TRELLIS_LOCAL_SMOKE_MODE=true
 TRELLIS_SANDBOX_TOKEN=local-sandbox-token
 HANDOFF_WEBHOOK_SECRET=local-handoff-secret
 DISCOVERY_LINKEDIN_ENABLED=false
+NO_SENDS_MODE=true
 ```
 
 Then:
 
 ```bash
+npm run doctor -- --json
 npm run doctor
 npm run dev
 ```
@@ -50,6 +60,14 @@ Success means:
 - `/dashboard` loads
 - the operator surface is reachable
 
+That does not prove:
+
+- hosted deploy
+- remote MCP
+- live signal ingest
+- discovery automation
+- outbound send safety
+
 ## Noob Rule
 
 Only tell the user the next missing step.
@@ -58,3 +76,5 @@ Good:
 
 - `Blocked: set CONVEX_URL before Trellis can persist state`
 - `Next: add FIRECRAWL_API_KEY so research can run`
+- `Next: run doctor again after updating .env`
+- `Later: add APIFY_TOKEN only after the first safe signal demo works`

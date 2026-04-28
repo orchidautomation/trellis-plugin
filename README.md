@@ -66,16 +66,15 @@ That agent might be:
 
 ## First Run
 
-The intended first-run path is the same in every host:
+The intended noob path is the same in every host:
 
 1. install the host bundle
-2. scaffold a Trellis app
-3. install dependencies
-4. generate or fill `.env`
-5. get local smoke mode green
-6. deploy
-7. connect remote MCP
-8. run one safe demo workflow
+2. create app
+3. fill env
+4. run doctor and get local smoke mode green
+5. deploy
+6. connect remote MCP
+7. run one safe demo
 
 The plugin should guide that flow. The Trellis CLI does the actual work underneath.
 
@@ -83,7 +82,7 @@ The plugin should guide that flow. The Trellis CLI does the actual work undernea
 
 Pick your host and run the matching install script from the release page.
 
-### 2. Create A Trellis App
+### 2. Create App
 
 The plugin should drive the Trellis scaffold first.
 
@@ -114,7 +113,21 @@ npm install
 cp .env.example .env
 ```
 
-### 3. Fill Environment And Check Readiness
+### 3. Fill Env
+
+The plugin should drive the user to the smallest env needed for a first proof before it asks for optional lanes.
+
+Minimum local proof:
+
+```bash
+TRELLIS_LOCAL_SMOKE_MODE=true
+TRELLIS_SANDBOX_TOKEN=local-sandbox-token
+HANDOFF_WEBHOOK_SECRET=local-handoff-secret
+DISCOVERY_LINKEDIN_ENABLED=false
+NO_SENDS_MODE=true
+```
+
+### 4. Run Doctor And Get Local Smoke Mode Green
 
 The plugin should not dump every possible variable up front. It should run the checks, then tell the user only the next blocker.
 
@@ -125,62 +138,41 @@ npm run ai-sdr -- check --json
 npm run doctor -- --json
 ```
 
-The fastest first proof is local smoke mode:
-
-```bash
-TRELLIS_LOCAL_SMOKE_MODE=true
-TRELLIS_SANDBOX_TOKEN=local-sandbox-token
-HANDOFF_WEBHOOK_SECRET=local-handoff-secret
-DISCOVERY_LINKEDIN_ENABLED=false
-```
-
 Then:
 
 ```bash
+npm run doctor -- --json
 npm run doctor
 npm run dev
 ```
 
-Success:
+Local proof success:
 
 - `/healthz` returns ok
 - `/dashboard` loads
 - the operator surface is reachable
 
-### 4. Connect Providers
+That still does not prove hosted deploy, remote MCP, or send safety.
 
-The plugin should connect providers one capability at a time, not as a wall of setup.
+### 5. Deploy
+
+The plugin should guide a noob through one canonical hosted path, not every possible path.
 
 Underlying CLI contract:
 
 ```bash
 npm run ai-sdr -- connect state convex --json
-npm run ai-sdr -- connect source apify --json
 npm run ai-sdr -- connect search firecrawl --json
-npm run ai-sdr -- connect enrichment prospeo --json
-npm run ai-sdr -- connect crm attio --json
-npm run ai-sdr -- connect email agentmail --json
+npm run ai-sdr -- connect model-routing vercel-ai-gateway --json
+npm run ai-sdr -- deploy vercel --json
 ```
-
-The current happy-path order is:
-
-1. Convex
-2. Vercel
-3. research
-4. discovery
-5. enrichment
-6. CRM / handoff
-7. email
-
-### 5. Deploy
-
-The plugin should guide a noob through one canonical path, not every possible path.
 
 Current preferred path:
 
-- Convex for state
-- Vercel for app hosting
-- remote MCP on the deployed Trellis app
+1. Convex
+2. Firecrawl
+3. Vercel AI Gateway
+4. Vercel for app hosting
 
 Underlying commands:
 
@@ -193,9 +185,15 @@ vercel --prod
 npm run ai-sdr -- deploy vercel --json
 ```
 
-### 6. Connect MCP
+Hosted proof is not complete until:
 
-After deploy, the plugin should wire the host to the deployed Trellis app over MCP.
+- the deploy succeeds
+- `${APP_URL}/healthz` is healthy
+- `${APP_URL}/dashboard` loads
+
+### 6. Connect Remote MCP
+
+After deploy and hosted checks, the plugin should wire the host to the deployed Trellis app over MCP.
 
 Underlying CLI contract:
 
@@ -215,9 +213,11 @@ ${APP_URL}/mcp/trellis
 
 The first demo should be constrained:
 
-- no-sends mode on
+- `NO_SENDS_MODE=true`
 - one signal or one input
-- run qualification
+- state visible in dashboard
+- same state visible through MCP
+- no discovery automation or outbound sends unless the user explicitly asks
 - run research
 - run enrichment
 - generate a draft
