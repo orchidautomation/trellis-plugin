@@ -2,21 +2,27 @@
 
 Official first-party Pluxx plugin source for Trellis onboarding across Claude Code, Cursor, Codex, and OpenCode.
 
+Trellis gives you the framework.
+
+This plugin gives you the guided user experience on top of it.
+
 ## Get The Plugin
 
 If you want to install the plugin and do not care about the source repo, use the GitHub release assets directly:
 
 - [Latest release page](https://github.com/orchidautomation/trellis-plugin/releases/latest)
-- `install-claude-code.sh`
-- `install-cursor.sh`
-- `install-codex.sh`
-- `install-opencode.sh`
-- `install-all.sh`
+- [install-claude-code.sh](https://github.com/orchidautomation/trellis-plugin/releases/latest/download/install-claude-code.sh)
+- [install-cursor.sh](https://github.com/orchidautomation/trellis-plugin/releases/latest/download/install-cursor.sh)
+- [install-codex.sh](https://github.com/orchidautomation/trellis-plugin/releases/latest/download/install-codex.sh)
+- [install-opencode.sh](https://github.com/orchidautomation/trellis-plugin/releases/latest/download/install-opencode.sh)
+- [install-all.sh](https://github.com/orchidautomation/trellis-plugin/releases/latest/download/install-all.sh)
 
 Fastest install paths:
 
 ```bash
 curl -fsSL https://github.com/orchidautomation/trellis-plugin/releases/latest/download/install-claude-code.sh | bash
+curl -fsSL https://github.com/orchidautomation/trellis-plugin/releases/latest/download/install-cursor.sh | bash
+curl -fsSL https://github.com/orchidautomation/trellis-plugin/releases/latest/download/install-opencode.sh | bash
 curl -fsSL https://github.com/orchidautomation/trellis-plugin/releases/latest/download/install-codex.sh | bash
 curl -fsSL https://github.com/orchidautomation/trellis-plugin/releases/latest/download/install-all.sh | bash
 ```
@@ -24,6 +30,10 @@ curl -fsSL https://github.com/orchidautomation/trellis-plugin/releases/latest/do
 This repository is the source project. The installable bundles live under GitHub Releases, not in the root file tree.
 
 ## What This Plugin Does
+
+Most noobs should not be forced to learn every environment variable, provider, and deploy step before they can see Trellis work.
+
+That is the problem this plugin solves.
 
 The plugin gives host-native onboarding and operating flows for Trellis:
 
