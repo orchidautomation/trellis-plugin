@@ -70,11 +70,13 @@ The intended noob path is the same in every host:
 
 1. install the host bundle
 2. create app
-3. fill env
-4. run doctor and get local smoke mode green
-5. deploy
-6. connect remote MCP
-7. run one safe demo
+3. use Node 22
+4. fill env
+5. choose smoke mode or real Convex mode
+6. run doctor and get local proof green
+7. deploy
+8. connect remote MCP
+9. run one safe demo
 
 The plugin should guide that flow. The Trellis CLI does the actual work underneath.
 
@@ -109,6 +111,7 @@ Then:
 
 ```bash
 cd ../my-ai-sdr
+nvm use 22
 npm install
 cp .env.example .env
 ```
@@ -127,7 +130,33 @@ DISCOVERY_LINKEDIN_ENABLED=false
 NO_SENDS_MODE=true
 ```
 
-### 4. Run Doctor And Get Local Smoke Mode Green
+### 4. Choose Local Mode
+
+The plugin should force one explicit choice:
+
+- smoke mode for fast boot proof
+- real Convex mode for stateful local development
+
+Smoke mode:
+
+```bash
+TRELLIS_LOCAL_SMOKE_MODE=true
+TRELLIS_SANDBOX_TOKEN=local-sandbox-token
+HANDOFF_WEBHOOK_SECRET=local-handoff-secret
+DISCOVERY_LINKEDIN_ENABLED=false
+NO_SENDS_MODE=true
+```
+
+Real Convex mode:
+
+```bash
+nvm use 22
+npx convex dev
+```
+
+Keep `npx convex dev` running in one terminal and `npm run dev` in another.
+
+### 5. Run Doctor And Get Local Proof Green
 
 The plugin should not dump every possible variable up front. It should run the checks, then tell the user only the next blocker.
 
@@ -152,9 +181,17 @@ Local proof success:
 - `/dashboard` loads
 - the operator surface is reachable
 
+If the user chose real Convex mode, the plugin should require:
+
+- `nvm use 22`
+- `npx convex dev`
+- `npm run dev`
+
+in that exact order.
+
 That still does not prove hosted deploy, remote MCP, or send safety.
 
-### 5. Deploy
+### 6. Deploy
 
 The plugin should guide a noob through one canonical hosted path, not every possible path.
 
@@ -177,6 +214,7 @@ Current preferred path:
 Underlying commands:
 
 ```bash
+nvm use 22
 npx convex dev
 npx convex deploy
 vercel login
@@ -191,7 +229,7 @@ Hosted proof is not complete until:
 - `${APP_URL}/healthz` is healthy
 - `${APP_URL}/dashboard` loads
 
-### 6. Connect Remote MCP
+### 7. Connect Remote MCP
 
 After deploy and hosted checks, the plugin should wire the host to the deployed Trellis app over MCP.
 
@@ -209,13 +247,14 @@ The remote MCP endpoint is usually:
 ${APP_URL}/mcp/trellis
 ```
 
-### 7. Run One Safe Demo
+### 8. Run One Safe Demo
 
 The first demo should be constrained:
 
 - `NO_SENDS_MODE=true`
-- run `npm run demo:smoke` first
-- after deploy, run `npm run demo:check -- --base-url "$APP_URL" --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"`
+- use `npm run ai-sdr:demo:smoke` for local proof
+- use `npm run dev` for a persistent local app that MCP should connect to
+- after deploy, run `npm run ai-sdr:demo:check -- --base-url "$APP_URL" --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"`
 - one signal or one input
 - state visible in dashboard
 - same state visible through MCP

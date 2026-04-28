@@ -45,17 +45,20 @@ Unless the user explicitly wants a custom scaffold, route them through this orde
 
 1. create app or use the reference AI SDR already in the Trellis repo
 2. fill `.env`
-3. run `doctor` and get smoke mode green locally
-4. deploy
-5. verify `/healthz` and `/dashboard`
-6. connect remote MCP
-7. run one safe signal demo
-8. only then enable discovery or real sends
+3. choose smoke mode or real Convex mode
+4. run `doctor` and get local proof green
+5. deploy
+6. verify `/healthz` and `/dashboard`
+7. connect remote MCP
+8. run one safe signal demo
+9. only then enable discovery or real sends
 
 Say the next step in those exact verbs when possible:
 
 - `Next: create app`
 - `Next: fill .env`
+- `Next: use Node 22`
+- `Next: start convex dev`
 - `Next: run doctor`
 - `Next: deploy`
 - `Next: connect remote MCP`

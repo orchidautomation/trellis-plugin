@@ -10,14 +10,16 @@ Use this skill when the user wants the shortest path to getting a Trellis app in
 ## Preferred Order
 
 1. create app and fill `.env`
-2. get smoke mode green locally
-3. set up Convex
-4. set up core hosted env
-5. deploy
-6. verify `/healthz` and `/dashboard`
-7. connect remote MCP
-8. run one safe signal demo
-9. only then enable discovery or sends
+2. use Node 22
+3. choose smoke mode or real Convex mode
+4. get local proof green
+5. set up Convex
+6. set up core hosted env
+7. deploy
+8. verify `/healthz` and `/dashboard`
+9. connect remote MCP
+10. run one safe signal demo
+11. only then enable discovery or sends
 
 ## Required Commands
 
@@ -40,12 +42,27 @@ Then tell the user only the next missing step.
 
 ## Convex
 
+Always use Node 22 first:
+
+```bash
+nvm use 22
+```
+
+For real local development:
+
 ```bash
 npx convex dev
+```
+
+Keep `npx convex dev` running while `npm run dev` runs in another terminal.
+
+For production:
+
+```bash
 npx convex deploy
 ```
 
-For coding-agent sessions:
+For coding-agent sessions where a login flow is awkward:
 
 ```bash
 CONVEX_AGENT_MODE=anonymous npx convex dev
@@ -66,6 +83,7 @@ Keep `NO_SENDS_MODE=true`.
 Do not treat the app as demo-ready until all of these are true:
 
 - `npm run demo:smoke` passes locally
+- or `npm run dev` + `npm run ai-sdr:demo:check` passes in real Convex mode
 - one hosted deployment exists
 - `/healthz` is healthy
 - `/dashboard` loads

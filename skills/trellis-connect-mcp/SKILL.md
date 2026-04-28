@@ -35,6 +35,14 @@ Swap the host target as needed:
 - local MCP = talk to the local Trellis app
 - remote MCP = talk to the deployed Trellis app
 
+For local MCP, prefer a persistent app process:
+
+```bash
+npm run dev
+```
+
+Do not use `demo:smoke` as the long-lived MCP target. That command is for proof, not for ongoing local control.
+
 The deployed control surface is the Trellis MCP endpoint, usually:
 
 ```text

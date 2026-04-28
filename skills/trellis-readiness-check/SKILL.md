@@ -10,9 +10,10 @@ Use this skill when the user wants to know what is missing before Trellis can ru
 The noob sequence here is:
 
 1. fill `.env`
-2. run `npm run doctor -- --json`
-3. fix only the next blocker
-4. boot local smoke mode
+2. choose smoke mode or real Convex mode
+3. run `npm run doctor -- --json`
+4. fix only the next blocker
+5. boot local proof
 
 ## Required Commands
 
@@ -72,6 +73,22 @@ The explicit next checks are:
 
 - local: `npm run demo:smoke`
 - hosted: `npm run demo:check -- --base-url "$APP_URL" --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"`
+
+For real Convex mode, be explicit:
+
+```bash
+nvm use 22
+npx convex dev
+npm run dev
+```
+
+Do not tell the user that `npm run dev` alone is enough when `CONVEX_URL` is set.
+
+If `PORT=3000` is already occupied, tell the user to either stop the old process or run:
+
+```bash
+PORT=3001 npm run dev
+```
 
 ## Noob Rule
 
