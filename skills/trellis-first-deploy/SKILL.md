@@ -65,11 +65,12 @@ Keep `NO_SENDS_MODE=true`.
 
 Do not treat the app as demo-ready until all of these are true:
 
+- `npm run demo:smoke` passes locally
 - one hosted deployment exists
 - `/healthz` is healthy
 - `/dashboard` loads
 - remote MCP is connected
-- one signal has been ingested
+- `npm run demo:check -- --base-url "$APP_URL" --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"` passes
 - the resulting state is visible in both dashboard and MCP
 
 Do not turn on discovery automation or outbound sends before that point.

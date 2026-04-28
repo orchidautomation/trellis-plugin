@@ -214,14 +214,13 @@ ${APP_URL}/mcp/trellis
 The first demo should be constrained:
 
 - `NO_SENDS_MODE=true`
+- run `npm run demo:smoke` first
+- after deploy, run `npm run demo:check -- --base-url "$APP_URL" --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"`
 - one signal or one input
 - state visible in dashboard
 - same state visible through MCP
 - no discovery automation or outbound sends unless the user explicitly asks
-- run research
-- run enrichment
-- generate a draft
-- inspect the result in dashboard or MCP
+- inspect the result in dashboard or MCP before enabling more lanes
 
 That proves the loop without turning the first run into a production blast radius.
 

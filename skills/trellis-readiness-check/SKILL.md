@@ -68,6 +68,11 @@ That does not prove:
 - discovery automation
 - outbound send safety
 
+The explicit next checks are:
+
+- local: `npm run demo:smoke`
+- hosted: `npm run demo:check -- --base-url "$APP_URL" --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"`
+
 ## Noob Rule
 
 Only tell the user the next missing step.
