@@ -71,8 +71,9 @@ That does not prove:
 
 The explicit next checks are:
 
-- local: `npm run demo:smoke`
-- hosted: `npm run demo:check -- --base-url "$APP_URL" --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"`
+- local smoke proof: `npm run ai-sdr:demo:smoke`
+- local real Convex proof: `npm run ai-sdr:demo:check -- --base-url http://localhost:3000 --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"`
+- hosted proof: `npm run ai-sdr:demo:check -- --base-url "$APP_URL" --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"`
 
 For real Convex mode, be explicit:
 
@@ -83,6 +84,8 @@ npm run dev
 ```
 
 Do not tell the user that `npm run dev` alone is enough when `CONVEX_URL` is set.
+
+Do not switch a user into real Convex mode until Node 22 is active.
 
 If `PORT=3000` is already occupied, tell the user to either stop the old process or run:
 
@@ -97,6 +100,7 @@ Only tell the user the next missing step.
 Good:
 
 - `Blocked: set CONVEX_URL before Trellis can persist state`
+- `Blocked: run nvm use 22 before Trellis can boot real Convex mode`
 - `Next: add FIRECRAWL_API_KEY so research can run`
 - `Next: run doctor again after updating .env`
 - `Later: add APIFY_TOKEN only after the first safe signal demo works`

@@ -80,6 +80,18 @@ The intended noob path is the same in every host:
 
 The plugin should guide that flow. The Trellis CLI does the actual work underneath.
 
+The hardened path is:
+
+```text
+Node 22
+-> npx convex dev
+-> npm run dev
+-> npm run ai-sdr:demo:check
+-> npx convex deploy
+-> vercel --prod
+-> remote MCP
+```
+
 ### 1. Install The Plugin
 
 Pick your host and run the matching install script from the release page.
@@ -156,6 +168,12 @@ npx convex dev
 
 Keep `npx convex dev` running in one terminal and `npm run dev` in another.
 
+Then verify the real local app:
+
+```bash
+npm run ai-sdr:demo:check -- --base-url http://localhost:3000 --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"
+```
+
 ### 5. Run Doctor And Get Local Proof Green
 
 The plugin should not dump every possible variable up front. It should run the checks, then tell the user only the next blocker.
@@ -218,10 +236,23 @@ nvm use 22
 npx convex dev
 npx convex deploy
 vercel login
+vercel env add
 vercel
 vercel --prod
 npm run ai-sdr -- deploy vercel --json
 ```
+
+After `npx convex deploy`, Vercel must use the Convex prod URL:
+
+```bash
+CONVEX_URL=https://<deployment>.convex.cloud
+NEXT_PUBLIC_CONVEX_URL=https://<deployment>.convex.cloud
+CONVEX_SITE_URL=https://<deployment>.convex.site
+```
+
+If `npx convex deploy` fails on schema validation against old prod data, use the Trellis runbook and staged migration path in:
+
+- `docs/convex-vercel-prod-runbook.md`
 
 Hosted proof is not complete until:
 

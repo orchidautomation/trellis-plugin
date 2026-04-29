@@ -78,6 +78,22 @@ npm run ai-sdr -- connect email agentmail --json
 - Rivet = actors
 - Vercel Sandbox = isolated agent execution
 
+## Apify Discovery Lane
+
+When the user adds discovery, accept actor slugs as the first-class setup path.
+
+Known good actor env:
+
+```bash
+APIFY_LINKEDIN_ACTOR_ID=harvestapi/linkedin-post-search
+APIFY_LINKEDIN_POSTS_ACTOR_ID=supreme_coder/linkedin-post
+APIFY_LINKEDIN_PROFILE_ACTOR_ID=harvestapi/linkedin-profile-scraper
+```
+
+Task IDs are optional. Trellis can work from actor IDs alone.
+
+Do not block the user on `*_TASK_ID` if the actor slugs are already present.
+
 ## Noob Rule
 
 After each provider step:

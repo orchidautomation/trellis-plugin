@@ -14,13 +14,13 @@ Remote MCP comes after app health, not before.
 For local app control:
 
 ```bash
-npm run ai-sdr -- mcp claude-code --local --write --json
+npm run ai-sdr -- mcp claude-code --local --write --json --url http://localhost:3000/mcp/trellis --token "$TRELLIS_MCP_TOKEN"
 ```
 
 For a deployed app:
 
 ```bash
-npm run ai-sdr -- mcp claude-code --remote --write --json
+npm run ai-sdr -- mcp claude-code --remote --write --json --url "${APP_URL}/mcp/trellis" --token "$TRELLIS_MCP_TOKEN"
 ```
 
 Swap the host target as needed:
@@ -42,6 +42,24 @@ npm run dev
 ```
 
 Do not use `demo:smoke` as the long-lived MCP target. That command is for proof, not for ongoing local control.
+
+The generated project config must use the flat MCP server shape:
+
+```json
+{
+  "mcpServers": {
+    "trellis": {
+      "type": "http",
+      "url": "http://localhost:3000/mcp/trellis",
+      "headers": {
+        "Authorization": "Bearer <token>"
+      }
+    }
+  }
+}
+```
+
+Do not write a nested `transport` block for the host config.
 
 The deployed control surface is the Trellis MCP endpoint, usually:
 

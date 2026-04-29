@@ -21,6 +21,14 @@ Use this skill when the user wants the shortest path to getting a Trellis app in
 10. run one safe signal demo
 11. only then enable discovery or sends
 
+Treat the canonical hosted path as:
+
+1. Convex Cloud
+2. Vercel
+3. remote Trellis MCP
+
+Do not route a first deploy through Railway.
+
 ## Required Commands
 
 Run:
@@ -56,6 +64,22 @@ npx convex dev
 
 Keep `npx convex dev` running while `npm run dev` runs in another terminal.
 
+Use this exact two-terminal local pattern:
+
+Terminal 1:
+
+```bash
+nvm use 22
+npx convex dev
+```
+
+Terminal 2:
+
+```bash
+nvm use 22
+npm run dev
+```
+
 For production:
 
 ```bash
@@ -70,11 +94,39 @@ CONVEX_AGENT_MODE=anonymous npx convex dev
 
 ## Vercel
 
+After Convex prod deploy succeeds, copy the prod Convex URL into Vercel env:
+
+```bash
+CONVEX_URL=https://<deployment>.convex.cloud
+NEXT_PUBLIC_CONVEX_URL=https://<deployment>.convex.cloud
+CONVEX_SITE_URL=https://<deployment>.convex.site
+```
+
+Minimum hosted env:
+
+```bash
+APP_URL=https://<your-vercel-domain>
+DASHBOARD_PASSWORD=<long-random-password>
+TRELLIS_SANDBOX_TOKEN=<long-random-secret>
+TRELLIS_MCP_TOKEN=<long-random-secret>
+SIGNAL_WEBHOOK_SECRET=<long-random-secret>
+HANDOFF_WEBHOOK_SECRET=<long-random-secret>
+NO_SENDS_MODE=true
+FIRECRAWL_API_KEY=<key>
+AI_GATEWAY_API_KEY=<key>
+```
+
 ```bash
 vercel login
 vercel
 vercel --prod
 ```
+
+If `APP_URL` changes after the first prod deploy, update it and redeploy once.
+
+If `npx convex deploy` fails on schema validation against old prod data, stop and use the repo runbook rather than loosening the final schema permanently:
+
+- `docs/convex-vercel-prod-runbook.md`
 
 ## Safe Demo Rule
 
@@ -88,7 +140,7 @@ Do not treat the app as demo-ready until all of these are true:
 - `/healthz` is healthy
 - `/dashboard` loads
 - remote MCP is connected
-- `npm run demo:check -- --base-url "$APP_URL" --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"` passes
+- `npm run ai-sdr:demo:check -- --base-url "$APP_URL" --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"` passes
 - the resulting state is visible in both dashboard and MCP
 
 Do not turn on discovery automation or outbound sends before that point.
@@ -101,3 +153,4 @@ Production is not done until:
 - `/healthz` is healthy
 - dashboard loads
 - the remote MCP endpoint is reachable
+- hosted `ai-sdr:demo:check` passes
