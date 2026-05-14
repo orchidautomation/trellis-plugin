@@ -1,6 +1,6 @@
 ---
 name: "trellis-onboarding"
-description: "Route a new Trellis user to the next correct workflow without making them understand the whole stack first."
+description: "Route a new Trellis user through the Cloudflare-first path without making them understand the whole stack first."
 ---
 
 # Trellis Onboarding
@@ -9,18 +9,19 @@ Use this skill when a user is new to Trellis and wants the shortest path to a wo
 
 ## Framing
 
-Trellis is the framework.
-
-The reference AI SDR is the first demo path.
+Trellis is a vertical GTM agent stack. Flue is hidden behind Trellis. Cloudflare is the default runtime and deploy target.
 
 Keep the explanation simple:
 
-- `ai-sdr.config.ts` is the app blueprint
+- `src/agent.ts` is the Trellis app blueprint
 - `knowledge/` is context
 - `skills/` is behavior
-- `modules` are building blocks
-- `providers` are outside services
-- `capabilityBindings` decide which provider does which job
+- `wrangler.jsonc` is the Cloudflare binding map
+- D1 is queryable Trellis state and traces
+- R2 stores knowledge and skill packs
+- Queues handle background work
+- Workflows handle durable workflow dispatch
+- `/mcp/trellis` is the agent control and inspection surface
 
 ## Noob Rule
 
@@ -33,34 +34,42 @@ Do one thing at a time:
 
 Prefer:
 
-- `Next: use the reference AI SDR before scaffolding a custom app`
-- `Next: get smoke mode green locally`
-- `Next: run vercel login`
-- `Blocked: CONVEX_URL is missing`
-- `Next: connect Firecrawl before optional lanes`
+- `Next: create the Cloudflare app`
+- `Next: run cf:login`
+- `Next: run doctor`
+- `Next: run smoke`
+- `Next: deploy`
+- `Next: verify cloudflare`
+- `Next: connect remote MCP`
+- `Blocked: Cloudflare auth is missing`
+- `Blocked: TRELLIS_API_KEY is missing for protected remote routes`
 
 ## Default Demo Order
 
-Unless the user explicitly wants a custom scaffold, route them through this order:
+Unless the user explicitly wants a different path, route them through this order:
 
-1. create app or use the reference AI SDR already in the Trellis repo
-2. fill `.env`
-3. choose smoke mode or real Convex mode
-4. run `doctor` and get local proof green
-5. deploy
-6. verify `/healthz` and `/dashboard`
-7. connect remote MCP
-8. run one safe signal demo
-9. only then enable discovery or real sends
+1. create a Trellis Cloudflare app
+2. use Node 22
+3. install dependencies
+4. authenticate Cloudflare
+5. run doctor
+6. run local smoke
+7. deploy
+8. verify Cloudflare locally and live
+9. connect remote MCP
+10. run one safe signal
+11. only then connect optional providers or enable sends
 
-Say the next step in those exact verbs when possible:
+Say the next step in these exact verbs when possible:
 
 - `Next: create app`
-- `Next: fill .env`
 - `Next: use Node 22`
-- `Next: start convex dev`
+- `Next: install`
+- `Next: authenticate Cloudflare`
 - `Next: run doctor`
+- `Next: run smoke`
 - `Next: deploy`
+- `Next: verify`
 - `Next: connect remote MCP`
 - `Next: run one safe demo`
 
@@ -69,32 +78,32 @@ Say the next step in those exact verbs when possible:
 Use these skills based on the user's next need:
 
 - `trellis-create-app`
-  - when they explicitly need a new Trellis app scaffold
+  - when they need a new Trellis Cloudflare scaffold
 - `trellis-readiness-check`
-  - when they need to know what is missing before boot or deploy
+  - when they need to know what is missing before boot, deploy, or live verification
 - `trellis-stack-explainer`
   - when they want to understand what the app contains
 - `trellis-connect-providers`
-  - when they need to wire external services one lane at a time
+  - when they need to wire provider credentials one lane at a time after first boot
 - `trellis-connect-mcp`
   - when they need local or remote MCP connected to Claude Code, Codex, Cursor, or OpenCode
 - `trellis-first-deploy`
-  - when they want the shortest path from local proof to a hosted demo
+  - when they want the shortest path from local proof to a hosted Cloudflare demo
 
 ## Source Of Truth
 
-Treat the Trellis CLI as the execution contract.
-
-Prefer machine-readable commands:
+Treat the Trellis CLI as the execution contract. Prefer machine-readable commands:
 
 ```bash
-npm run ai-sdr -- init <target-dir> --json
-npm run ai-sdr -- modules --json
-npm run ai-sdr -- check --json
-npm run doctor -- --json
-npm run ai-sdr -- connect <capability> <provider> --json
-npm run ai-sdr -- mcp claude-code --local --write --json
-npm run ai-sdr -- deploy <target> --json
+npm run trellis -- init <target-dir> --name <app-name> --json
+npm run trellis -- doctor --json
+npm run trellis -- smoke --json
+npm run trellis -- deploy --json
+npm run trellis -- verify cloudflare --json
+npm run trellis -- verify cloudflare --live --url <worker-url> --api-key "$TRELLIS_API_KEY"
+npm run trellis -- connect <provider> --json
+npm run trellis -- docs add <path> --json
+npm run trellis -- mcp claude-code --remote --write --json --url "${APP_URL}/mcp/trellis" --token "$TRELLIS_API_KEY"
 ```
 
-Do not scrape pretty terminal output if JSON is available.
+Do not route new users through Convex, Vercel, Railway, or legacy AI SDR commands. Do not scrape pretty terminal output if JSON is available.

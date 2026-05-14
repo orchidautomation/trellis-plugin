@@ -2,9 +2,9 @@
 
 Official first-party Pluxx plugin source for Trellis onboarding across Claude Code, Cursor, Codex, and OpenCode.
 
-Trellis gives you the framework and CLI.
+Trellis is now Cloudflare-first. The plugin should treat Cloudflare Workers, D1, R2, Queues, Workflows, Durable Objects, Workers AI, AI Gateway, and the Trellis MCP route as the default path. Convex and Vercel are not part of the current first-run flow.
 
-This plugin is the guided layer on top of that CLI. It is not the product logic. It is the host-native setup and operating experience for people who do not want to memorize every Trellis command on day one.
+The Trellis framework and CLI do the real work. This plugin is the guided layer that helps a coding host choose the next correct command, diagnose blockers, and avoid unsafe provider activation before the Cloudflare app is proven.
 
 ## Get The Plugin
 
@@ -35,26 +35,21 @@ Install target matrix:
 - OpenCode -> `install-opencode.sh`
 - all four -> `install-all.sh`
 
-This repository is the source project. The installable host bundles live under GitHub Releases, not in the root file tree.
+This repository is the source project. Installable host bundles live under GitHub Releases.
 
 ## What This Plugin Does
 
-Most users should not have to learn every environment variable, provider, and deploy step before they can see Trellis work.
-
-That is the problem this plugin solves.
-
 The plugin gives host-native onboarding and operating flows for Trellis:
 
-- create a Trellis app
-- explain the active stack
-- check readiness and blockers
-- connect providers one lane at a time
+- create a Cloudflare-first Trellis app
+- explain the active Worker, D1, R2, Queue, Workflow, AI Gateway, provider, MCP, and trace surfaces
+- check readiness and route the user to the next blocker
+- connect providers after the first Cloudflare proof
 - connect local or remote MCP
-- take a first deployment to production
+- deploy and verify the Worker
+- keep no-send and approval gates intact
 
-The goal is simple:
-
-> a noob who vibecoded this into existence can use the Trellis plugin to create and ship a GTM agent to production
+The goal is simple: a first-time user can create and ship a GTM agent to Cloudflare production without memorizing the Trellis CLI.
 
 That agent might be:
 
@@ -64,235 +59,176 @@ That agent might be:
 - a customer-success copilot
 - a GTM analytics or recommendation workflow
 
-## First Run
+## Cloudflare-First Runbook
 
-The intended noob path is the same in every host:
+The intended path is the same in every host:
 
 1. install the host bundle
-2. create app
+2. create a Trellis app
 3. use Node 22
-4. fill env
-5. choose smoke mode or real Convex mode
-6. run doctor and get local proof green
-7. deploy
-8. connect remote MCP
-9. run one safe demo
+4. install dependencies
+5. authenticate Cloudflare
+6. run doctor
+7. run local smoke
+8. deploy to Cloudflare
+9. verify Cloudflare locally and then live
+10. connect remote MCP
+11. run one safe signal
+12. only then add optional providers or sends
 
-The plugin should guide that flow. The Trellis CLI does the actual work underneath.
+Canonical commands inside a generated app:
 
-The hardened path is:
-
-```text
-Node 22
--> npx convex dev
--> npm run dev
--> npm run ai-sdr:demo:check
--> npx convex deploy
--> vercel --prod
--> remote MCP
+```bash
+npm install
+npm run cf:login
+npm run doctor -- --json
+npm run smoke -- --json
+npm run deploy -- --json
+npm run verify -- --json
 ```
 
-### 1. Install The Plugin
+Live verification after deploy:
 
-Pick your host and run the matching install script from the release page.
+```bash
+npm run verify -- --live --url https://<worker>.workers.dev --api-key "$TRELLIS_API_KEY"
+```
 
-### 2. Create App
+Safe live agent exercise:
 
-The plugin should drive the Trellis scaffold first.
+```bash
+npm run verify -- --live --url https://<worker>.workers.dev --api-key "$TRELLIS_API_KEY" --exercise-agent
+```
+
+## Create App
 
 Underlying CLI contract:
 
 ```bash
-npm run ai-sdr -- init ../my-trellis-agent --name my-trellis-agent --json
-```
-
-If you want the full AI SDR reference recipe:
-
-```bash
-npm run ai-sdr -- init ../my-ai-sdr --name my-ai-sdr \
-  --with-discovery \
-  --with-deep-research \
-  --with-enrichment \
-  --with-crm \
-  --with-email \
-  --with-handoff \
-  --json
+npm run trellis -- init ../my-trellis-agent --name my-trellis-agent --json
 ```
 
 Then:
 
 ```bash
-cd ../my-ai-sdr
+cd ../my-trellis-agent
 nvm use 22
 npm install
-cp .env.example .env
+npm run cf:login
 ```
 
-### 3. Fill Env
+`trellis init` emits the Cloudflare scaffold by default:
 
-The plugin should drive the user to the smallest env needed for a first proof before it asks for optional lanes.
+- `src/agent.ts` with Trellis-only app logic
+- `src/index.ts` Worker wrapper
+- `src/trellis-runtime.ts` hidden Cloudflare runtime adapter
+- `wrangler.jsonc`
+- D1 binding: `TRELLIS_DB`
+- R2 bindings: `TRELLIS_PACKS`, `TRELLIS_ARTIFACTS`
+- Queue binding: `TRELLIS_EVENTS`
+- Workflow binding: `PROSPECT_WORKFLOW`
+- AI binding: `AI`
+- Browser binding: `BROWSER`
+- `knowledge/**/*.md`
+- `skills/**/SKILL.md`
 
-Minimum local proof:
+## Cloudflare Env And Secrets
+
+The first deploy only requires Cloudflare auth through `wrangler login` or `CLOUDFLARE_ACCOUNT_ID` plus `CLOUDFLARE_API_TOKEN`.
+
+Set these after the app exists:
 
 ```bash
-TRELLIS_LOCAL_SMOKE_MODE=true
-TRELLIS_SANDBOX_TOKEN=local-sandbox-token
-HANDOFF_WEBHOOK_SECRET=local-handoff-secret
-DISCOVERY_LINKEDIN_ENABLED=false
-NO_SENDS_MODE=true
+npx wrangler secret put TRELLIS_API_KEY
+npx wrangler secret put TRELLIS_WEBHOOK_SECRET
 ```
 
-### 4. Choose Local Mode
-
-The plugin should force one explicit choice:
-
-- smoke mode for fast boot proof
-- real Convex mode for stateful local development
-
-Smoke mode:
+Provider credentials come after first boot:
 
 ```bash
-TRELLIS_LOCAL_SMOKE_MODE=true
-TRELLIS_SANDBOX_TOKEN=local-sandbox-token
-HANDOFF_WEBHOOK_SECRET=local-handoff-secret
-DISCOVERY_LINKEDIN_ENABLED=false
-NO_SENDS_MODE=true
+npm run trellis -- connect firecrawl --json
+npm run trellis -- connect attio --json
+npm run trellis -- connect agentmail --json
+npm run trellis -- connect apify --json
+npm run trellis -- connect prospeo --json
+npm run trellis -- connect langfuse --json
+npm run trellis -- connect braintrust --json
 ```
 
-Real Convex mode:
+Each `connect` guide writes a non-secret manifest under `.trellis/providers/` and tells the user which Cloudflare Worker secrets to set with `npx wrangler secret put`.
+
+## Knowledge And Skills
+
+Deploy auto-packs the default `knowledge/**/*.md` files and tracked `SKILL.md` files into `TRELLIS_PACKS`.
+
+Use explicit docs packing when needed:
 
 ```bash
-nvm use 22
-npx convex dev
+npm run trellis -- docs add ./product-docs
+npm run deploy -- --json
 ```
 
-Keep `npx convex dev` running in one terminal and `npm run dev` in another.
+The Worker hydrates R2-backed markdown packs into bounded Flue/Trellis context. Do not tell users to paste product docs into prompts.
 
-Then verify the real local app:
+## MCP
 
-```bash
-npm run ai-sdr:demo:check -- --base-url http://localhost:3000 --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"
+The MCP route is:
+
+```text
+/mcp/trellis
 ```
 
-### 5. Run Doctor And Get Local Proof Green
+Local endpoint:
 
-The plugin should not dump every possible variable up front. It should run the checks, then tell the user only the next blocker.
-
-Underlying CLI contract:
-
-```bash
-npm run ai-sdr -- check --json
-npm run doctor -- --json
+```text
+http://localhost:3000/mcp/trellis
 ```
 
-Then:
-
-```bash
-npm run doctor -- --json
-npm run doctor
-npm run dev
-```
-
-Local proof success:
-
-- `/healthz` returns ok
-- `/dashboard` loads
-- the operator surface is reachable
-
-If the user chose real Convex mode, the plugin should require:
-
-- `nvm use 22`
-- `npx convex dev`
-- `npm run dev`
-
-in that exact order.
-
-That still does not prove hosted deploy, remote MCP, or send safety.
-
-### 6. Deploy
-
-The plugin should guide a noob through one canonical hosted path, not every possible path.
-
-Underlying CLI contract:
-
-```bash
-npm run ai-sdr -- connect state convex --json
-npm run ai-sdr -- connect search firecrawl --json
-npm run ai-sdr -- connect model-routing vercel-ai-gateway --json
-npm run ai-sdr -- deploy vercel --json
-```
-
-Current preferred path:
-
-1. Convex
-2. Firecrawl
-3. Vercel AI Gateway
-4. Vercel for app hosting
-
-Underlying commands:
-
-```bash
-nvm use 22
-npx convex dev
-npx convex deploy
-vercel login
-vercel env add
-vercel
-vercel --prod
-npm run ai-sdr -- deploy vercel --json
-```
-
-After `npx convex deploy`, Vercel must use the Convex prod URL:
-
-```bash
-CONVEX_URL=https://<deployment>.convex.cloud
-NEXT_PUBLIC_CONVEX_URL=https://<deployment>.convex.cloud
-CONVEX_SITE_URL=https://<deployment>.convex.site
-```
-
-If `npx convex deploy` fails on schema validation against old prod data, use the Trellis runbook and staged migration path in:
-
-- `docs/convex-vercel-prod-runbook.md`
-
-Hosted proof is not complete until:
-
-- the deploy succeeds
-- `${APP_URL}/healthz` is healthy
-- `${APP_URL}/dashboard` loads
-
-### 7. Connect Remote MCP
-
-After deploy and hosted checks, the plugin should wire the host to the deployed Trellis app over MCP.
-
-Underlying CLI contract:
-
-```bash
-npm run ai-sdr -- mcp claude-code --remote --write --json
-```
-
-Swap `claude-code` for `cursor`, `codex`, or `opencode` as needed.
-
-The remote MCP endpoint is usually:
+Deployed endpoint:
 
 ```text
 ${APP_URL}/mcp/trellis
 ```
 
-### 8. Run One Safe Demo
+The Trellis CLI currently writes Claude Code MCP config directly:
 
-The first demo should be constrained:
+```bash
+npm run trellis -- mcp claude-code --local --write --json
+npm run trellis -- mcp claude-code --remote --write --json --url "${APP_URL}/mcp/trellis" --token "$TRELLIS_API_KEY"
+```
 
-- `NO_SENDS_MODE=true`
-- use `npm run ai-sdr:demo:smoke` for local proof
-- use `npm run dev` for a persistent local app that MCP should connect to
-- after deploy, run `npm run ai-sdr:demo:check -- --base-url "$APP_URL" --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"`
-- one signal or one input
-- state visible in dashboard
-- same state visible through MCP
-- no discovery automation or outbound sends unless the user explicitly asks
-- inspect the result in dashboard or MCP before enabling more lanes
+For Cursor, Codex, and OpenCode, use the same flat HTTP MCP shape in the host's native config:
 
-That proves the loop without turning the first run into a production blast radius.
+```json
+{
+  "mcpServers": {
+    "trellis": {
+      "type": "http",
+      "url": "https://<worker>.workers.dev/mcp/trellis",
+      "headers": {
+        "Authorization": "Bearer <TRELLIS_API_KEY>"
+      }
+    }
+  }
+}
+```
+
+Do not write a nested transport block.
+
+## Safe Demo Rule
+
+Do not push discovery automation or outbound sends before this is true:
+
+- `npm run doctor -- --json` passes or has only optional provider warnings
+- `npm run smoke -- --json` passes
+- `npm run deploy -- --json` succeeds
+- `npm run verify -- --json` passes local Cloudflare checks
+- `npm run verify -- --live --url "$APP_URL" --api-key "$TRELLIS_API_KEY"` passes live checks
+- `/healthz` is healthy
+- `/mcp/trellis` is reachable with auth
+- the dashboard is reachable with auth when `TRELLIS_API_KEY` is configured
+- one safe signal has been exercised only if the user accepts that it may invoke the live Flue/Cloudflare harness
+
+Outbound writes remain gated by Trellis approval and no-send behavior until explicitly configured otherwise.
 
 ## What The Plugin Owns
 
@@ -300,10 +236,11 @@ The plugin owns:
 
 - guided onboarding
 - host-native install and setup
+- Cloudflare deploy sequencing
 - provider sequencing
-- deploy sequencing
 - MCP connection flow
 - first-run explanations
+- readiness triage
 
 The plugin does not own:
 
@@ -311,8 +248,9 @@ The plugin does not own:
 - app business logic
 - workflow implementation
 - provider implementations
+- Cloudflare resource implementation
 
-Those belong to the Trellis framework and the app itself.
+Those belong to the Trellis framework, the generated app, and Cloudflare.
 
 ## Source Layout
 
@@ -337,6 +275,7 @@ If you already have the `pluxx` CLI installed locally:
 pluxx doctor
 pluxx lint
 pluxx validate
+pluxx test --target claude-code cursor codex opencode
 pluxx build --target claude-code cursor codex opencode
 ```
 
@@ -357,34 +296,6 @@ and publishes:
 - install scripts
 - release manifest
 - checksums
-
-## CI And Release Automation
-
-- `.github/workflows/ci.yml`
-  - clones the Pluxx CLI repo
-  - validates and builds the plugin
-  - verifies the GitHub release publish plan
-  - uploads the raw `dist/` artifact
-- `.github/workflows/release.yml`
-  - runs on `v*` tags
-  - builds the plugin with a checked-out Pluxx CLI
-  - runs `pluxx publish --github-release`
-  - attaches installer scripts and host bundles to the GitHub Release
-
-## Local Proof
-
-The strongest local proof is:
-
-```bash
-PLUXX_REPO_DIR=../pluxx ./scripts/build-with-pluxx-checkout.sh
-```
-
-Then verify:
-
-```bash
-pluxx lint
-pluxx validate
-```
 
 ## Notes
 

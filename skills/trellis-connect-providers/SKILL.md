@@ -1,11 +1,11 @@
 ---
 name: "trellis-connect-providers"
-description: "Connect Trellis providers one capability at a time and explain only the next missing piece."
+description: "Connect Trellis providers as Cloudflare Worker secrets one provider at a time."
 ---
 
 # Trellis Connect Providers
 
-Use this skill when a user needs to connect outside services to a Trellis app.
+Use this skill when a user needs to connect outside services to a Trellis Cloudflare app.
 
 Keep the sequence narrow. Do not push every provider at once.
 
@@ -14,110 +14,118 @@ Keep the sequence narrow. Do not push every provider at once.
 Use:
 
 ```bash
-npm run ai-sdr -- modules --json
-npm run ai-sdr -- check --json
 npm run doctor -- --json
+npm run verify -- --json
 ```
 
-Also read `ai-sdr.config.ts`.
+Also read:
+
+1. `src/agent.ts`
+2. `wrangler.jsonc`
+3. `.trellis/providers/` if it exists
 
 ## Provider Order
 
 Prefer this order:
 
-1. state and runtime
-2. research
-3. model routing
-4. deploy surface
-5. one safe signal path
-6. discovery
-7. enrichment
-8. CRM and handoff
-9. outbound email
+1. first Cloudflare boot and deploy
+2. protected route secret
+3. research provider
+4. trace export provider, if requested
+5. CRM
+6. email and handoff
+7. discovery
+8. enrichment
+9. outbound send enablement
 
-For the noob flow, the minimum core demo set is:
+For the noob flow, the minimum demo set is Cloudflare only:
 
-1. `connect state convex`
-2. `connect search firecrawl`
-3. `connect model-routing vercel-ai-gateway`
-4. deploy
-5. connect remote MCP
-6. run one safe signal
+1. `npm run deploy -- --json`
+2. `npm run verify -- --json`
+3. `npm run verify -- --live --url "$APP_URL" --api-key "$TRELLIS_API_KEY"`
+4. remote MCP
+5. one safe signal
+
+Only after that, add providers.
 
 ## Commands
 
 Use the CLI as the contract:
 
 ```bash
-npm run ai-sdr -- connect <capability> <provider> --json
+npm run trellis -- connect <provider> --json
 ```
 
 Examples:
 
 ```bash
-npm run ai-sdr -- connect state convex --json
-npm run ai-sdr -- connect search firecrawl --json
-npm run ai-sdr -- connect model-routing vercel-ai-gateway --json
-npm run ai-sdr -- connect enrichment prospeo --json
-npm run ai-sdr -- connect source apify --json
-npm run ai-sdr -- connect crm attio --json
-npm run ai-sdr -- connect email agentmail --json
+npm run trellis -- connect firecrawl --json
+npm run trellis -- connect attio --json
+npm run trellis -- connect agentmail --json
+npm run trellis -- connect apify --json
+npm run trellis -- connect prospeo --json
+npm run trellis -- connect langfuse --json
+npm run trellis -- connect braintrust --json
 ```
+
+The command writes a non-secret manifest and tells the user which `npx wrangler secret put <NAME>` commands to run.
 
 ## Explain Providers Plainly
 
-- Convex = state
 - Firecrawl = search and extraction
-- Vercel AI Gateway = model routing
-- Apify = discovery
-- Parallel = deep research and monitors
+- Attio = CRM sync
+- AgentMail = outbound email and inbound reply webhooks
+- Apify = discovery source
 - Prospeo = enrichment
-- Attio = CRM
-- AgentMail = outbound email
-- Slack = handoff
-- Rivet = actors
-- Vercel Sandbox = isolated agent execution
+- Slack = handoff and operator channel
+- Langfuse = optional trace export
+- Braintrust = optional trace export
+- Cloudflare AI Gateway = default model gateway
 
-## Apify Discovery Lane
+## Cloudflare Secret Rule
 
-When the user adds discovery, accept actor slugs as the first-class setup path.
+Deployed agents read provider credentials from Cloudflare Worker secrets.
 
-Known good actor env:
+Do not put secrets in:
+
+- `wrangler.jsonc`
+- `.trellis/providers/`
+- `knowledge/`
+- `skills/`
+- MCP host config
+
+Use:
 
 ```bash
-APIFY_LINKEDIN_ACTOR_ID=harvestapi/linkedin-post-search
-APIFY_LINKEDIN_POSTS_ACTOR_ID=supreme_coder/linkedin-post
-APIFY_LINKEDIN_PROFILE_ACTOR_ID=harvestapi/linkedin-profile-scraper
+npx wrangler secret put FIRECRAWL_API_KEY
+npx wrangler secret put ATTIO_API_KEY
+npx wrangler secret put AGENTMAIL_API_KEY
 ```
-
-Task IDs are optional. Trellis can work from actor IDs alone.
-
-Do not block the user on `*_TASK_ID` if the actor slugs are already present.
 
 ## Noob Rule
 
 After each provider step:
 
 1. say what the provider does
-2. say the missing env keys
-3. rerun `doctor`
-4. tell the user only the next blocker
+2. say the exact missing secret names
+3. rerun `npm run doctor -- --json`
+4. rerun `npm run verify -- --json`
+5. tell the user only the next blocker
 
 Use explicit handoffs:
 
-- `Next: fill .env`
+- `Next: set Worker secrets`
 - `Next: run doctor`
-- `Next: deploy`
+- `Next: deploy again`
+- `Next: verify live`
 - `Next: connect remote MCP`
 
 ## Safe Demo Rule
 
-For the reference AI SDR, stop after the minimum demo set until the user has:
+Do not push discovery automation or real send providers before:
 
-- deployed the app
-- verified `/healthz`
-- verified `/dashboard`
-- connected remote MCP
-- ingested one signal safely
-
-Do not push discovery automation or real send providers before that point unless the user explicitly asks.
+- Cloudflare deploy is green
+- live verify is green
+- remote MCP is connected
+- one safe signal has been inspected
+- approval and no-send behavior is understood

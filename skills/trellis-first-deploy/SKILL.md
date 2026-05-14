@@ -1,33 +1,39 @@
 ---
 name: "trellis-first-deploy"
-description: "Take a first-time Trellis user from local proof to the simplest credible production deployment."
+description: "Take a first-time Trellis user from local proof to the simplest credible Cloudflare production deployment."
 ---
 
 # Trellis First Deploy
 
-Use this skill when the user wants the shortest path to getting a Trellis app into a hosted, demo-safe state.
+Use this skill when the user wants the shortest path to getting a Trellis app into a hosted, demo-safe Cloudflare state.
 
 ## Preferred Order
 
-1. create app and fill `.env`
+1. create app
 2. use Node 22
-3. choose smoke mode or real Convex mode
-4. get local proof green
-5. set up Convex
-6. set up core hosted env
+3. install dependencies
+4. authenticate Cloudflare
+5. run doctor
+6. run smoke
 7. deploy
-8. verify `/healthz` and `/dashboard`
-9. connect remote MCP
-10. run one safe signal demo
-11. only then enable discovery or sends
+8. verify Cloudflare locally
+9. verify deployed `/healthz`, `/mcp/trellis`, and `/smoke`
+10. connect remote MCP
+11. run one safe signal demo only if requested
+12. only then enable provider credentials, discovery, or sends
 
 Treat the canonical hosted path as:
 
-1. Convex Cloud
-2. Vercel
-3. remote Trellis MCP
+1. Cloudflare Workers
+2. D1
+3. R2 packs
+4. Queues and dead-letter queue
+5. Workflows
+6. Durable Object agent sessions
+7. Workers AI through Cloudflare AI Gateway
+8. Trellis MCP
 
-Do not route a first deploy through Railway.
+Do not route a first deploy through Vercel, Convex, or Railway.
 
 ## Required Commands
 
@@ -35,20 +41,24 @@ Run:
 
 ```bash
 npm run doctor -- --json
-npm run ai-sdr -- deploy vercel --json
+npm run smoke -- --json
+npm run deploy -- --json
+npm run verify -- --json
 ```
 
-Then verify:
+Then verify the deployed Worker:
 
 ```bash
-curl -fsS ${APP_URL}/healthz
+npm run verify -- --live --url "$APP_URL" --api-key "$TRELLIS_API_KEY"
 ```
 
-Then load `${APP_URL}/dashboard` in the browser.
+If the user wants a safe live harness exercise:
 
-Then tell the user only the next missing step.
+```bash
+npm run verify -- --live --url "$APP_URL" --api-key "$TRELLIS_API_KEY" --exercise-agent
+```
 
-## Convex
+## Cloudflare
 
 Always use Node 22 first:
 
@@ -56,92 +66,65 @@ Always use Node 22 first:
 nvm use 22
 ```
 
-For real local development:
+Authenticate:
 
 ```bash
-npx convex dev
+npm run cf:login
 ```
 
-Keep `npx convex dev` running while `npm run dev` runs in another terminal.
-
-Use this exact two-terminal local pattern:
-
-Terminal 1:
+or use:
 
 ```bash
-nvm use 22
-npx convex dev
+CLOUDFLARE_ACCOUNT_ID=<account-id>
+CLOUDFLARE_API_TOKEN=<token>
 ```
 
-Terminal 2:
+The first `npm run deploy -- --json` should resolve or create:
+
+- `TRELLIS_DB` D1 database
+- `TRELLIS_PACKS` R2 bucket
+- `TRELLIS_ARTIFACTS` R2 bucket
+- `TRELLIS_EVENTS` queue and dead-letter queue
+- `PROSPECT_WORKFLOW` Cloudflare Workflow
+- Worker deploy
+- R2 pack sync for `knowledge/**/*.md` and `skills/**/SKILL.md`
+
+## Secrets
+
+Minimum protected remote route secret:
 
 ```bash
-nvm use 22
-npm run dev
+npx wrangler secret put TRELLIS_API_KEY
 ```
 
-For production:
+Optional webhook auth:
 
 ```bash
-npx convex deploy
+npx wrangler secret put TRELLIS_WEBHOOK_SECRET
 ```
 
-For coding-agent sessions where a login flow is awkward:
+Do not require provider secrets for the first deploy. Add them after the Worker is alive:
 
 ```bash
-CONVEX_AGENT_MODE=anonymous npx convex dev
+npm run trellis -- connect firecrawl --json
+npm run trellis -- connect attio --json
+npm run trellis -- connect agentmail --json
+npm run trellis -- connect apify --json
+npm run trellis -- connect prospeo --json
 ```
-
-## Vercel
-
-After Convex prod deploy succeeds, copy the prod Convex URL into Vercel env:
-
-```bash
-CONVEX_URL=https://<deployment>.convex.cloud
-NEXT_PUBLIC_CONVEX_URL=https://<deployment>.convex.cloud
-CONVEX_SITE_URL=https://<deployment>.convex.site
-```
-
-Minimum hosted env:
-
-```bash
-APP_URL=https://<your-vercel-domain>
-DASHBOARD_PASSWORD=<long-random-password>
-TRELLIS_SANDBOX_TOKEN=<long-random-secret>
-TRELLIS_MCP_TOKEN=<long-random-secret>
-SIGNAL_WEBHOOK_SECRET=<long-random-secret>
-HANDOFF_WEBHOOK_SECRET=<long-random-secret>
-NO_SENDS_MODE=true
-FIRECRAWL_API_KEY=<key>
-AI_GATEWAY_API_KEY=<key>
-```
-
-```bash
-vercel login
-vercel
-vercel --prod
-```
-
-If `APP_URL` changes after the first prod deploy, update it and redeploy once.
-
-If `npx convex deploy` fails on schema validation against old prod data, stop and use the repo runbook rather than loosening the final schema permanently:
-
-- `docs/convex-vercel-prod-runbook.md`
 
 ## Safe Demo Rule
 
-Keep `NO_SENDS_MODE=true`.
-
 Do not treat the app as demo-ready until all of these are true:
 
-- `npm run demo:smoke` passes locally
-- or `npm run dev` + `npm run ai-sdr:demo:check` passes in real Convex mode
-- one hosted deployment exists
+- `npm run smoke -- --json` passes locally
+- `npm run deploy -- --json` succeeds
+- `npm run verify -- --json` passes local Cloudflare checks
+- `npm run verify -- --live --url "$APP_URL" --api-key "$TRELLIS_API_KEY"` passes remote checks
 - `/healthz` is healthy
-- `/dashboard` loads
-- remote MCP is connected
-- `npm run ai-sdr:demo:check -- --base-url "$APP_URL" --dashboard-password "$DASHBOARD_PASSWORD" --mcp-token "$TRELLIS_MCP_TOKEN" --signal-secret "$SIGNAL_WEBHOOK_SECRET"` passes
-- the resulting state is visible in both dashboard and MCP
+- `/mcp/trellis` is reachable with auth
+- R2 pack sync is clean
+- the dashboard and operator surfaces are reachable with auth
 
 Do not turn on discovery automation or outbound sends before that point.
 
@@ -149,8 +132,9 @@ Do not turn on discovery automation or outbound sends before that point.
 
 Production is not done until:
 
-- deploy succeeds
+- Cloudflare deploy succeeds
+- D1/R2/Queue/Workflow bindings are resolved
+- packs are synced to R2
 - `/healthz` is healthy
-- dashboard loads
-- the remote MCP endpoint is reachable
-- hosted `ai-sdr:demo:check` passes
+- `/mcp/trellis` is reachable with auth
+- `trellis verify cloudflare --live` passes

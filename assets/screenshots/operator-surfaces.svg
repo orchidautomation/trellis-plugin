@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
+  <title id="title">Trellis Operator Surfaces</title>
+  <desc id="desc">A screenshot-style overview of Trellis operator surfaces for traces, Slack, MCP, and approvals.</desc>
+  <rect width="1440" height="900" fill="#F8FAFC"/>
+  <text x="96" y="120" fill="#0F172A" font-family="Inter, Arial, sans-serif" font-size="46" font-weight="700">Trellis operator surfaces</text>
+  <text x="96" y="166" fill="#475569" font-family="Inter, Arial, sans-serif" font-size="24">Watch, approve, debug, and connect the same Cloudflare runtime from multiple hosts.</text>
+  <g font-family="Inter, Arial, sans-serif">
+    <rect x="96" y="236" width="584" height="248" rx="22" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="144" y="300" fill="#0F172A" font-size="30" font-weight="700">Observability</text>
+    <text x="144" y="348" fill="#475569" font-size="22">D1-backed trace events</text>
+    <text x="144" y="394" fill="#475569" font-size="22">Redacted lifecycle payloads</text>
+    <text x="144" y="440" fill="#475569" font-size="22">Langfuse, Braintrust, and generic export hooks</text>
+    <rect x="760" y="236" width="584" height="248" rx="22" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="808" y="300" fill="#0F172A" font-size="30" font-weight="700">Streaming</text>
+    <text x="808" y="348" fill="#475569" font-size="22">/events and /events/stream</text>
+    <text x="808" y="394" fill="#475569" font-size="22">Replay with Last-Event-ID</text>
+    <text x="808" y="440" fill="#475569" font-size="22">Heartbeat, reconnect, terminal close</text>
+    <rect x="96" y="548" width="584" height="248" rx="22" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="144" y="612" fill="#0F172A" font-size="30" font-weight="700">Slack operator</text>
+    <text x="144" y="660" fill="#475569" font-size="22">Milestone updates and slash commands</text>
+    <text x="144" y="706" fill="#475569" font-size="22">Approval buttons for drafts</text>
+    <text x="144" y="752" fill="#475569" font-size="22">Failures record trace events, never block ingestion</text>
+    <rect x="760" y="548" width="584" height="248" rx="22" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="808" y="612" fill="#0F172A" font-size="30" font-weight="700">MCP clients</text>
+    <text x="808" y="660" fill="#475569" font-size="22">Claude Code, Cursor, Codex, OpenCode</text>
+    <text x="808" y="706" fill="#475569" font-size="22">Local or deployed /mcp/trellis endpoint</text>
+    <text x="808" y="752" fill="#475569" font-size="22">Same API key and runtime contract</text>
+  </g>
+</svg>

@@ -7,6 +7,8 @@
   "scripts": {
     "doctor": "pluxx doctor",
     "lint": "pluxx lint",
+    "eval": "pluxx eval",
+    "test": "pluxx test --target claude-code cursor codex opencode",
     "validate": "pluxx validate",
     "build": "pluxx build --target claude-code cursor codex opencode",
     "publish:dry-run": "pluxx publish --github-release --dry-run --allow-dirty --version 0.1.0"

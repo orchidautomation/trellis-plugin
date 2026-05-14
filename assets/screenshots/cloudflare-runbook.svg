@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
+  <title id="title">Trellis Cloudflare Runbook</title>
+  <desc id="desc">A screenshot-style overview of the Trellis Cloudflare-first runbook.</desc>
+  <rect width="1440" height="900" fill="#F8FAFC"/>
+  <rect x="72" y="64" width="1296" height="772" rx="28" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="128" y="146" fill="#0F172A" font-family="Inter, Arial, sans-serif" font-size="44" font-weight="700">Trellis Cloudflare-first runbook</text>
+  <text x="128" y="192" fill="#475569" font-family="Inter, Arial, sans-serif" font-size="24">Create, prove, deploy, verify, then connect providers.</text>
+  <g font-family="Inter, Arial, sans-serif" font-size="23" font-weight="700">
+    <rect x="128" y="264" width="212" height="120" rx="18" fill="#E0F2FE" stroke="#38BDF8"/>
+    <text x="164" y="310" fill="#075985">1 init</text>
+    <text x="164" y="346" fill="#075985" font-size="17" font-weight="500">Worker scaffold</text>
+    <rect x="382" y="264" width="212" height="120" rx="18" fill="#DCFCE7" stroke="#22C55E"/>
+    <text x="418" y="310" fill="#166534">2 doctor</text>
+    <text x="418" y="346" fill="#166534" font-size="17" font-weight="500">bindings and env</text>
+    <rect x="636" y="264" width="212" height="120" rx="18" fill="#FFEDD5" stroke="#F97316"/>
+    <text x="672" y="310" fill="#9A3412">3 smoke</text>
+    <text x="672" y="346" fill="#9A3412" font-size="17" font-weight="500">safe local proof</text>
+    <rect x="890" y="264" width="212" height="120" rx="18" fill="#DBEAFE" stroke="#146EF5"/>
+    <text x="926" y="310" fill="#1E40AF">4 deploy</text>
+    <text x="926" y="346" fill="#1E40AF" font-size="17" font-weight="500">Cloudflare Worker</text>
+    <rect x="1144" y="264" width="160" height="120" rx="18" fill="#EDE9FE" stroke="#8B5CF6"/>
+    <text x="1180" y="310" fill="#5B21B6">5 verify</text>
+    <text x="1180" y="346" fill="#5B21B6" font-size="17" font-weight="500">live checks</text>
+  </g>
+  <g stroke="#94A3B8" stroke-width="6" stroke-linecap="round">
+    <path d="M340 324h42"/>
+    <path d="M594 324h42"/>
+    <path d="M848 324h42"/>
+    <path d="M1102 324h42"/>
+  </g>
+  <rect x="128" y="456" width="1184" height="236" rx="22" fill="#0F172A"/>
+  <text x="176" y="522" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700">Expected generated app surface</text>
+  <g fill="#CBD5E1" font-family="Inter, Arial, sans-serif" font-size="22">
+    <text x="176" y="580">Worker routes: /healthz, /signals, /events, /events/stream, /mcp/trellis</text>
+    <text x="176" y="626">Bindings: TRELLIS_DB, TRELLIS_PACKS, TRELLIS_ARTIFACTS, TRELLIS_EVENTS, PROSPECT_WORKFLOW, AI, BROWSER</text>
+    <text x="176" y="672">Operator rules: safe smoke first, approvals stay gated, provider sends stay disabled until proven</text>
+  </g>
+</svg>
