@@ -44,8 +44,10 @@ The plugin gives host-native onboarding and operating flows for Trellis:
 - create a Cloudflare-first Trellis app
 - explain the active Worker, D1, R2, Queue, Workflow, AI Gateway, provider, MCP, and trace surfaces
 - check readiness and route the user to the next blocker
+- create, bind, verify, inspect, seed, and clean the Trellis D1 database safely
 - connect providers after the first Cloudflare proof
-- connect local or remote MCP
+- connect local or remote SDR and operator MCP surfaces
+- build agent workflows, state maps, knowledge packs, and bounded skills
 - deploy and verify the Worker
 - keep no-send and approval gates intact
 
@@ -130,6 +132,65 @@ npm run cf:login
 - Browser binding: `BROWSER`
 - `knowledge/**/*.md`
 - `skills/**/SKILL.md`
+- role-shaped MCP surfaces:
+  - `/mcp/trellis` for business-facing agent tools such as `trellis-sdr`
+  - `/mcp/operator` for runtime/operator tools such as `trellis-operator`
+
+## Build Agent
+
+When a host needs to build agent behavior, use `trellis-build-agent`.
+
+That skill codifies the current Trellis pattern:
+
+- `src/agent.ts` owns the agent workflow and MCP surface configuration.
+- `src/state/*.map.ts` owns business projections into Trellis-managed D1 state records.
+- `knowledge/**/*.md` holds company, ICP, messaging, examples, and policies.
+- `skills/**/SKILL.md` holds bounded methodology for each skill.
+- Trellis owns internal D1 tables, approval gates, provider-action state, and trace events.
+- The SDR MCP and operator MCP are separate role surfaces over the same runtime.
+
+Minimal role-shaped MCP config:
+
+```ts
+mcp: {
+  name: "trellis-sdr",
+  surface: "sdr",
+  operator: {
+    name: "trellis-operator",
+  },
+  tools: {
+    include: ["list_leads", "get_lead", "approve_draft", "qualify_lead"],
+    skillTools: [
+      {
+        name: "qualify_lead",
+        skill: "icp-qualification",
+        schema: schema.qualification(),
+      },
+    ],
+  },
+}
+```
+
+## Database Setup
+
+When a host needs to create, bind, inspect, seed, or clean D1, use `trellis-setup-database`.
+
+That skill codifies the current Trellis database rule:
+
+- `TRELLIS_DB` is the D1 binding in `wrangler.jsonc`.
+- `npm run deploy -- --json` should resolve or create the D1 database and apply Trellis runtime schema.
+- Trellis owns internal tables such as signals, state records, drafts, approvals, provider actions, audit events, and trace events.
+- App builders define business state in `src/state/*.map.ts` using `trellis.state(...)`.
+- Demo cleanup should delete rows by exact `trace_id`, `signal_id`, `workspace_id`, or fixture source, not by broad table wipes.
+
+Useful database proof commands:
+
+```bash
+npm run doctor -- --json
+npm run deploy -- --json
+npm run verify -- --json
+npx wrangler d1 execute <database-name> --remote --command "SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE 'trellis_%' ORDER BY name"
+```
 
 ## Cloudflare Env And Secrets
 
@@ -171,22 +232,30 @@ The Worker hydrates R2-backed markdown packs into bounded Flue/Trellis context. 
 
 ## MCP
 
-The MCP route is:
+The business-facing MCP route is:
 
 ```text
 /mcp/trellis
 ```
 
-Local endpoint:
+The operator/control-plane MCP route is:
+
+```text
+/mcp/operator
+```
+
+Local endpoints:
 
 ```text
 http://localhost:3000/mcp/trellis
+http://localhost:3000/mcp/operator
 ```
 
-Deployed endpoint:
+Deployed endpoints:
 
 ```text
 ${APP_URL}/mcp/trellis
+${APP_URL}/mcp/operator
 ```
 
 The Trellis CLI currently writes Claude Code MCP config directly:
@@ -196,14 +265,26 @@ npm run trellis -- mcp claude-code --local --write --json
 npm run trellis -- mcp claude-code --remote --write --json --url "${APP_URL}/mcp/trellis" --token "$TRELLIS_API_KEY"
 ```
 
+When configuring manually, prefer two MCP entries:
+
+- `trellis-sdr` -> `${APP_URL}/mcp/trellis`
+- `trellis-operator` -> `${APP_URL}/mcp/operator`
+
 For Cursor, Codex, and OpenCode, use the same flat HTTP MCP shape in the host's native config:
 
 ```json
 {
   "mcpServers": {
-    "trellis": {
+    "trellis-sdr": {
       "type": "http",
       "url": "https://<worker>.workers.dev/mcp/trellis",
+      "headers": {
+        "Authorization": "Bearer <TRELLIS_API_KEY>"
+      }
+    },
+    "trellis-operator": {
+      "type": "http",
+      "url": "https://<worker>.workers.dev/mcp/operator",
       "headers": {
         "Authorization": "Bearer <TRELLIS_API_KEY>"
       }
@@ -225,6 +306,7 @@ Do not push discovery automation or outbound sends before this is true:
 - `npm run verify -- --live --url "$APP_URL" --api-key "$TRELLIS_API_KEY"` passes live checks
 - `/healthz` is healthy
 - `/mcp/trellis` is reachable with auth
+- `/mcp/operator` is reachable with auth
 - the dashboard is reachable with auth when `TRELLIS_API_KEY` is configured
 - one safe signal has been exercised only if the user accepts that it may invoke the live Flue/Cloudflare harness
 
@@ -239,6 +321,7 @@ The plugin owns:
 - Cloudflare deploy sequencing
 - provider sequencing
 - MCP connection flow
+- database setup, schema explanation, and demo-data hygiene
 - first-run explanations
 - readiness triage
 

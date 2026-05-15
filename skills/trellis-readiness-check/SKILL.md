@@ -29,6 +29,7 @@ Group blockers into:
 
 - Cloudflare auth blockers
 - scaffold shape blockers
+- D1 binding or schema blockers
 - binding blockers
 - local smoke blockers
 - pack sync blockers
@@ -97,8 +98,21 @@ Use precise next-step language:
 - `Blocked: PROSPECT_WORKFLOW binding is missing from wrangler.jsonc`
 - `Blocked: set TRELLIS_API_KEY as a Worker secret before protected remote checks`
 - `Next: run npm run deploy -- --json so Trellis can provision D1, R2, Queues, Workflows, and sync packs`
+- `Next: use trellis-setup-database to inspect D1 schema, trace rows, approvals, and seeded demo data`
 - `Later: connect FIRECRAWL_API_KEY after the Cloudflare app is alive`
 
-## Noob Rule
+## Novice Rule
 
 Only tell the user the next missing step. Do not switch them into provider setup until doctor, smoke, deploy, and Cloudflare verification are green enough to trust.
+
+## Agent Shape Checks
+
+When the readiness problem is about app behavior rather than infrastructure, route to `trellis-build-agent` and inspect:
+
+- `src/agent.ts` imports `trellis` and `schema` from `@trellis/gtm`.
+- `src/agent.ts` keeps `trellis.safeOutbound()` unless the user explicitly changed safety.
+- `mcp.surface` is role-shaped when appropriate, such as `sdr`.
+- `mcp.operator.name` is present when an operator MCP should exist.
+- `mcp.tools.skillTools` maps bounded tool names to real skill directory names.
+- `src/state/*.map.ts` uses `trellis.state(...)` instead of hand-authored D1 migrations.
+- each `skills/**/SKILL.md` has purpose, inputs, method, output contract, and safety sections.

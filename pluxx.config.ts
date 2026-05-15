@@ -34,7 +34,7 @@ export default definePlugin({
       './assets/screenshots/operator-surfaces.svg',
     ],
     defaultPrompts: [
-      'Use Trellis to create a Cloudflare-first GTM agent and tell me the next exact command.',
+      'Use Trellis to create or build a GTM agent with D1, knowledge, skills, state, MCP surfaces, and the next exact command.',
       'Run a Trellis readiness check and identify the next blocker before deploy.',
       'Explain the Trellis Cloudflare stack and how MCP, traces, providers, and approvals fit together.',
     ],

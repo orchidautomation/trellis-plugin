@@ -38,7 +38,7 @@ Prefer this order:
 8. enrichment
 9. outbound send enablement
 
-For the noob flow, the minimum demo set is Cloudflare only:
+For the novice flow, the minimum demo set is Cloudflare only:
 
 1. `npm run deploy -- --json`
 2. `npm run verify -- --json`
@@ -102,7 +102,7 @@ npx wrangler secret put ATTIO_API_KEY
 npx wrangler secret put AGENTMAIL_API_KEY
 ```
 
-## Noob Rule
+## Novice Rule
 
 After each provider step:
 

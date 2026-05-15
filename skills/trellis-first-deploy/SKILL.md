@@ -17,7 +17,7 @@ Use this skill when the user wants the shortest path to getting a Trellis app in
 6. run smoke
 7. deploy
 8. verify Cloudflare locally
-9. verify deployed `/healthz`, `/mcp/trellis`, and `/smoke`
+9. verify deployed `/healthz`, `/mcp/trellis`, `/mcp/operator`, and `/smoke`
 10. connect remote MCP
 11. run one safe signal demo only if requested
 12. only then enable provider credentials, discovery, or sends
@@ -89,6 +89,8 @@ The first `npm run deploy -- --json` should resolve or create:
 - Worker deploy
 - R2 pack sync for `knowledge/**/*.md` and `skills/**/SKILL.md`
 
+If D1 setup, schema, seed data, trace cleanup, or state-row inspection becomes the main question, switch to `trellis-setup-database`.
+
 ## Secrets
 
 Minimum protected remote route secret:
@@ -123,6 +125,7 @@ Do not treat the app as demo-ready until all of these are true:
 - `npm run verify -- --live --url "$APP_URL" --api-key "$TRELLIS_API_KEY"` passes remote checks
 - `/healthz` is healthy
 - `/mcp/trellis` is reachable with auth
+- `/mcp/operator` is reachable with auth
 - R2 pack sync is clean
 - the dashboard and operator surfaces are reachable with auth
 
@@ -137,4 +140,5 @@ Production is not done until:
 - packs are synced to R2
 - `/healthz` is healthy
 - `/mcp/trellis` is reachable with auth
+- `/mcp/operator` is reachable with auth
 - `trellis verify cloudflare --live` passes

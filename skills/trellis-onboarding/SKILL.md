@@ -22,8 +22,9 @@ Keep the explanation simple:
 - Queues handle background work
 - Workflows handle durable workflow dispatch
 - `/mcp/trellis` is the agent control and inspection surface
+- `/mcp/operator` is the runtime control-plane surface when the app exposes a role-shaped MCP like `trellis-sdr`
 
-## Noob Rule
+## Novice Rule
 
 Do one thing at a time:
 
@@ -81,8 +82,12 @@ Use these skills based on the user's next need:
   - when they need a new Trellis Cloudflare scaffold
 - `trellis-readiness-check`
   - when they need to know what is missing before boot, deploy, or live verification
+- `trellis-setup-database`
+  - when they need to create, bind, inspect, seed, clean, or explain the D1 database and schema
 - `trellis-stack-explainer`
   - when they want to understand what the app contains
+- `trellis-build-agent`
+  - when they want to build or modify `src/agent.ts`, `src/state/*.map.ts`, `knowledge/`, `skills/`, or MCP tool surfaces
 - `trellis-connect-providers`
   - when they need to wire provider credentials one lane at a time after first boot
 - `trellis-connect-mcp`
@@ -101,9 +106,23 @@ npm run trellis -- smoke --json
 npm run trellis -- deploy --json
 npm run trellis -- verify cloudflare --json
 npm run trellis -- verify cloudflare --live --url <worker-url> --api-key "$TRELLIS_API_KEY"
+npx wrangler d1 execute <database-name> --remote --command "SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE 'trellis_%' ORDER BY name"
 npm run trellis -- connect <provider> --json
 npm run trellis -- docs add <path> --json
 npm run trellis -- mcp claude-code --remote --write --json --url "${APP_URL}/mcp/trellis" --token "$TRELLIS_API_KEY"
 ```
 
 Do not route new users through Convex, Vercel, Railway, or legacy AI SDR commands. Do not scrape pretty terminal output if JSON is available.
+
+## Current Trellis Agent Pattern
+
+When the user asks to build an agent, use `trellis-build-agent` and make these concepts explicit:
+
+- `src/agent.ts` defines the Trellis workflow.
+- `src/state/*.map.ts` defines business state projections.
+- Trellis owns internal D1 tables and trace/approval schema.
+- `trellis-setup-database` handles D1 creation, binding, schema proof, seed data, and safe demo cleanup.
+- `skills/**/SKILL.md` files are bounded methods, not the entire agent.
+- `knowledge/**/*.md` files are fetched into runtime context through R2 packs.
+- `/mcp/trellis` should be the role-facing surface such as `trellis-sdr`.
+- `/mcp/operator` should be the platform/operator surface such as `trellis-operator`.

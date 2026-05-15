@@ -54,6 +54,8 @@ Use this mapping:
 - Durable Object = agent identity and session owner
 - Workers AI and AI Gateway = model path
 - MCP = host control and inspection route
+- role-shaped MCP = business surface such as `trellis-sdr` at `/mcp/trellis`
+- operator MCP = platform surface such as `trellis-operator` at `/mcp/operator`
 - provider manifests = non-secret setup records
 - Worker secrets = real credentials
 
@@ -66,7 +68,8 @@ For generated apps, expect:
 - Worker route: `/`
 - health route: `/healthz`
 - smoke route: `/smoke`
-- MCP route: `/mcp/trellis`
+- role-facing MCP route: `/mcp/trellis`
+- operator MCP route: `/mcp/operator`
 - dashboard route: `/dashboard`
 - signal route: `/webhooks/signals`
 - approval routes: `/approvals/*`
@@ -75,6 +78,26 @@ For generated apps, expect:
 - event stream routes: `/events` and `/events/stream` when the runtime includes them
 
 Once `TRELLIS_API_KEY` is configured, protected routes need bearer auth.
+
+## D1 And State Explanation
+
+Explain D1 in two layers:
+
+- Trellis internal tables are owned by the framework: signals, state records, drafts, approvals, provider runs, provider actions, workflows, audit events, trace events, operator controls, smoke runs, agent sessions, and surface thread links.
+- Business tables are declared in `src/state/*.map.ts` with `trellis.state(...)` and stored as projections in `trellis_state_records`.
+
+Do not tell a novice to edit internal D1 schema for normal agent work.
+
+## Skill Explanation
+
+For each `skills/**/SKILL.md`, explain:
+
+- what the skill decides or produces
+- what knowledge it depends on
+- which schema in `src/agent.ts` validates it
+- whether it can have side effects
+
+Skills should be small bounded methods. The workflow in `src/agent.ts` composes them.
 
 ## First Safe Demo Path
 
